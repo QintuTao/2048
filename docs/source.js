@@ -1,11 +1,60 @@
-/**
- * ===== ===== Constants ===== =====
- */
+/** ====== Constants ====== */
 const GRIDSIZE = 4;
 
-/**
- *  ===== ===== Functions ===== =====
- */
+class Board {
+    /**
+     * Constructs a board with 4*4 tiles 
+     */
+    constructor() {
+        /**
+         * The data of the game is abstracted into an 2D array,
+         * each tile is either null for empty block, or
+         * a value retpresenting the tile's value 
+         */
+        this.board = [];
+        for (let i = 0; i < GRIDSIZE; ++i) {
+            this.board.push(null)
+        }
+        this.board.map(x => {
+            let arr = []
+            for (let i = 0; i < GRIDSIZE; ++i) {
+                arr.push(null);
+            }
+            return arr;
+        })
+
+        /** Binding Methods */
+        this.randomInitTile = this.randomInitTile.bind(this);
+        /**
+         * Randomly put a number to the board to start the game 
+         */
+        this.randomInitTile();
+    }
+
+    /**
+     * Creates a tile with value '2' at random position
+     * @returns true if it is such position is not occupied by other tiles
+     */
+    randomInitTile() {
+        
+    }
+
+    /**
+     * Given the moving direction, calc the next state
+     * @param {string} dir 
+     */
+    nextBoard(dir) {
+
+    }
+    /** UI Methods */
+    move(init, des) {}
+
+    merge(first, second, des) {}
+
+    append(pos) {}
+
+    double(pos) {}
+}
 
 /**
  * Runs the application,
@@ -16,6 +65,7 @@ function run() {
     console.log(2)
     renderGrid()
     bindKeys()
+    let k = new Board();
 }
 
 /**
@@ -48,7 +98,7 @@ const bindKeys = () => {}
 const renderBlock = (row, col) => {
     const rowStyle = `grid-row: ${row+1} / ${row+2}`
     const colStyle = `grid-column: ${col+1} / ${col+2}`
-    return `<div class="row-${row} col-${col} block" style="${rowStyle}; ${colStyle}"> 0 </div>`
+    return `<div class="row-${row} col-${col} cell" style="${rowStyle}; ${colStyle}"> 0 </div>`
 }
 
 
