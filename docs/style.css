@@ -33,6 +33,15 @@ html{
     justify-content: center;
 }
 
+.tile {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    width: 100px;
+    height: 100px;
+    transition: ease-in-out 200ms;
+}
+
 
 /* rgb values for tiles:
    2   : #eee4da
