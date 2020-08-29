@@ -59,6 +59,7 @@ class Board {
      * @param {number} init initial x position
      * @param {number} des final x position
      * @param {number} y the fixed y position
+     * @param {boolean} endLife if the moving block should be abandond
      */
     moveX(init, des, y, endLife) {
             this.board[y][des] = this.board[y][init]
@@ -80,6 +81,7 @@ class Board {
      * @param {number} init initial y position
      * @param {number} des final y position
      * @param {number} x the fixed x position
+     * @param {boolean} endLife if the moving block should be abandond
      */
     moveY(init, des, x, endLife) {
             this.board[des][x] = this.board[init][x]
