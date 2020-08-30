@@ -35,6 +35,8 @@ class Board {
         this.farthestCellUp = this.farthestCellUp.bind(this);
         this.moveDown = this.moveDown.bind(this);
         this.farthestCellDown = this.farthestCellDown.bind(this);
+        this.double = this.changeColor.bind(this);
+        this.changeColor = this.changeColor.bind(this);
     }
 
     start() {this.randomInitTile()}
@@ -310,7 +312,51 @@ farthestCellDown(currRow,currCol){
     }
 
     double(x,y) {
-        $(`.${x}-${y}`).val($(`.${x}-${y}`).val() * 2)
+        $(`.${x}-${y}`).val($(`.${x}-${y}`).val() * 2);
+        this.changeColor(x,y);
+    }    
+
+    changeColor(x,y){
+        var value = this.board[x][y];
+        console.log(value);
+        var backgroundColor = "#eee4da";
+            switch (value) {
+                case 4:
+                    backgroundColor = "#ede0c8";
+                    break;
+                case 8:
+                    backgroundColor = "#f2b179";
+                    break;
+                case 16:
+                    backgroundColor = "#f59563";
+                    break;
+                case 32:
+                    backgroundColor= "#f67c5f";
+                    break;
+                case 64:
+                    backgroundColor =  "#f65e3b";
+                    break;
+                case 128:
+                    backgroundColor =  "#edcf72";
+                    break;
+                case 256:
+                    backgroundColor =  "#edcc61";
+                    break;
+                case 512:
+                    backgroundColor =  "#edc850";   
+                    break;
+                case 1024:
+                    backgroundColor =  "#edc53f"; 
+                    break;
+                case 2048:
+                    backgroundColor =  "#edc22e";    
+                    break;
+                default:
+                    backgroundColor = "#eee4da";
+                    break;
+            }
+            console.log(backgroundColor);
+            $('.grid-component').css({'background-color': backgroundColor}); //incomplete!!!!!
     }
 
     // Helpers
