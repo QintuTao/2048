@@ -27,6 +27,14 @@ class Board {
         this.randomInitTile = this.randomInitTile.bind(this);
         this.isOccupied = this.isOccupied.bind(this);
         this.start = this.start.bind(this);
+        this.moveLeft = this.moveLeft.bind(this);
+        this.farthestCellLeft = this.farthestCellLeft.bind(this);
+        this.moveRight = this.moveRight.bind(this);
+        this.farthestCellRight = this.farthestCellRight.bind(this);
+        this.moveUp = this.moveUp.bind(this);
+        this.farthestCellUp = this.farthestCellUp.bind(this);
+        this.moveDown = this.moveDown.bind(this);
+        this.farthestCellDown = this.farthestCellDown.bind(this);
     }
 
     start() {this.randomInitTile()}
@@ -136,6 +144,159 @@ class Board {
         }
     }
 
+/**
+ * Shifts all cells to the left if possible
+ */
+ moveLeft(){
+     var moved = false;
+    for (let row = 0; row < GRIDSIZE; row++) {
+        for (let column = 0; column < GRIDSIZE; column++) {
+            const cell = this.board[row][column];
+            if(cell!=null){
+            var desCell = this.farthestCellLeft(row,column);
+            var nextCell = this.board[row][desCell-1];
+            if(cell == nextCell) {
+                this.mergeX(column,desCell-1,row);
+                moved = true;
+            } else if(desCell != column){
+                this.moveX(column,desCell,row,false);
+                moved = true;
+            }
+    }
+        }
+         
+    }
+      if(moved)this.randomInitTile();   
+}
+
+/**
+ * Finds the leftmost position that the current cell can shift to
+ * @param {number} currRow 
+ * @param {number} currCol 
+ */
+farthestCellLeft(currRow,currCol){
+    while(currCol>0&&this.board[currRow][currCol-1]==null){
+        currCol --;
+    }
+    return currCol;
+}
+
+/**
+ * Shifts all cells to the right if possible
+ */
+moveRight(){
+    var moved = false;
+    for (let row = 0; row < GRIDSIZE; row++) {
+        for (let column = GRIDSIZE-1; column >= 0; column--) {
+            const cell = this.board[row][column];
+            if(cell!=null){
+            var desCell = this.farthestCellRight(row,column);
+            var nextCell = this.board[row][desCell+1];
+            if(cell == nextCell) {
+                this.mergeX(column,desCell+1,row);
+                moved = true;
+            } else if(desCell != column){
+                this.moveX(column,desCell,row,false);
+                moved = true;
+            }
+   }
+       }
+   }
+     if(moved)this.randomInitTile();   
+}
+
+/**
+* Finds the rightmost position that the current cell can shift to
+* @param {number} currRow 
+* @param {number} currCol 
+*/
+farthestCellRight(currRow,currCol){
+   while(currCol<GRIDSIZE-1 && this.board[currRow][currCol+1]==null){
+       currCol ++;
+   }
+   return currCol;
+}
+
+/**
+ * Shifts all cells up if possible
+ */
+moveUp(){
+    var moved = false;
+    for (let column = 0; column < GRIDSIZE; column++) {
+        for (let row = 0; row < GRIDSIZE; row++) {
+            const cell = this.board[row][column];
+            if(cell!=null){
+            var desCell = this.farthestCellUp(row,column);
+            if(desCell==0){
+                var nextCell = null;
+            }else{
+            var nextCell = this.board[desCell-1][column];
+            }
+            if(cell == nextCell) {
+                this.mergeY(row,desCell-1,column);
+                moved = true;
+            } else if(desCell != row){
+                this.moveY(row,desCell,column,false);
+                moved = true;
+            }
+   }
+       }
+   }
+     if(moved)this.randomInitTile();   
+}
+
+/**
+* Finds the upmost position that the current cell can shift to
+* @param {number} currRow 
+* @param {number} currCol 
+*/
+farthestCellUp(currRow,currCol){
+   while(currRow>0 && this.board[currRow-1][currCol]==null){
+       currRow --;
+   }
+   return currRow;
+}
+
+/**
+ * Shifts all cells down if possible
+ */
+moveDown(){
+    var moved = false;
+    for (let column = 0; column < GRIDSIZE; column++) {
+        for (let row = GRIDSIZE-1; row >= 0; row--) {
+            const cell = this.board[row][column];
+            if(cell!=null){
+            var desCell = this.farthestCellDown(row,column);
+            if(desCell==3){
+                var nextCell = null;
+            }else{
+                var nextCell = this.board[desCell+1][column];
+            }
+            if(cell == nextCell) {
+                this.mergeY(row,desCell+1,column);
+                moved = true;
+            } else if(desCell != row){
+                this.moveY(row,desCell,column,false);
+                moved = true;
+            }
+   }
+       }
+   }
+     if(moved)this.randomInitTile();   
+}
+
+/**
+* Finds the downmost position that the current cell can shift to
+* @param {number} currRow 
+* @param {number} currCol 
+*/
+farthestCellDown(currRow,currCol){
+   while(currRow<GRIDSIZE-1 && this.board[currRow+1][currCol]==null){
+       currRow ++;
+   }
+   return currRow;
+}
+
     /**
      * Insert a block to the board 
      * @param {number} x x pos
@@ -173,9 +334,9 @@ class Board {
  */
 function run() {
     renderGrid()
-    bindKeys()
     let g = new Board()
-    // g.start()
+    bindKeys(g)
+    g.start()
 }
 
 /**
@@ -196,7 +357,23 @@ const renderGrid = () => {
  * Add Event Handling to the app,
  *  events will include pause, moving etc
  */
-const bindKeys = () => {}
+const bindKeys = (board) => {
+    window.addEventListener('keydown', function(evt){
+        if (evt.keyCode === 37) {
+            console.log("left key pressed");
+            board.moveLeft();
+         } else if (evt.keyCode === 39) {
+            console.log("right key pressed");
+            board.moveRight();
+         } else if (evt.keyCode === 38){
+            console.log("up key pressed");
+            board.moveUp();
+         } else if (evt.keyCode === 40){
+            console.log("down key pressed");
+            board.moveDown();
+         }
+    });
+}
 
 /**
  * Renders a block based on row and col given
