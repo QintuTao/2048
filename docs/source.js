@@ -23,6 +23,8 @@ class Board {
             return arr;
         })
 
+        this.syncLock = false // true == ON, which means the class is locked and no key press should invoke any effects 
+
         /** Binding Methods */
         this.randomInitTile = this.randomInitTile.bind(this);
         this.isOccupied = this.isOccupied.bind(this);
@@ -35,7 +37,7 @@ class Board {
         this.farthestCellUp = this.farthestCellUp.bind(this);
         this.moveDown = this.moveDown.bind(this);
         this.farthestCellDown = this.farthestCellDown.bind(this);
-        this.double = this.changeColor.bind(this);
+        this.double = this.double.bind(this);
         this.changeColor = this.changeColor.bind(this);
     }
 
@@ -146,30 +148,30 @@ class Board {
         }
     }
 
-/**
- * Shifts all cells to the left if possible
- */
- moveLeft(){
-     var moved = false;
-    for (let row = 0; row < GRIDSIZE; row++) {
-        for (let column = 0; column < GRIDSIZE; column++) {
-            const cell = this.board[row][column];
-            if(cell!=null){
-            var desCell = this.farthestCellLeft(row,column);
-            var nextCell = this.board[row][desCell-1];
-            if(cell == nextCell) {
-                this.mergeX(column,desCell-1,row);
-                moved = true;
-            } else if(desCell != column){
-                this.moveX(column,desCell,row,false);
-                moved = true;
-            }
-    }
+    /**
+     * Shifts all cells to the left if possible
+     */
+    moveLeft(){
+        var moved = false;
+        for (let row = 0; row < GRIDSIZE; row++) {
+            for (let column = 0; column < GRIDSIZE; column++) {
+                const cell = this.board[row][column];
+                if(cell!==null){
+                var desCell = this.farthestCellLeft(row,column);
+                var nextCell = this.board[row][desCell-1];
+                if(cell === nextCell) {
+                    this.mergeX(column,desCell-1,row);
+                    moved = true;
+                } else if(desCell !== column){
+                    this.moveX(column,desCell,row,false);
+                    moved = true;
+                }
         }
-         
+            }
+            
+        }
+        if(moved)this.randomInitTile();   
     }
-      if(moved)this.randomInitTile();   
-}
 
 /**
  * Finds the leftmost position that the current cell can shift to
@@ -177,127 +179,127 @@ class Board {
  * @param {number} currCol 
  */
 farthestCellLeft(currRow,currCol){
-    while(currCol>0&&this.board[currRow][currCol-1]==null){
+    while(currCol>0&&this.board[currRow][currCol-1]===null){
         currCol --;
     }
     return currCol;
 }
 
-/**
- * Shifts all cells to the right if possible
- */
-moveRight(){
-    var moved = false;
-    for (let row = 0; row < GRIDSIZE; row++) {
-        for (let column = GRIDSIZE-1; column >= 0; column--) {
-            const cell = this.board[row][column];
-            if(cell!=null){
-            var desCell = this.farthestCellRight(row,column);
-            var nextCell = this.board[row][desCell+1];
-            if(cell == nextCell) {
-                this.mergeX(column,desCell+1,row);
-                moved = true;
-            } else if(desCell != column){
-                this.moveX(column,desCell,row,false);
-                moved = true;
-            }
-   }
-       }
-   }
-     if(moved)this.randomInitTile();   
-}
-
-/**
-* Finds the rightmost position that the current cell can shift to
-* @param {number} currRow 
-* @param {number} currCol 
-*/
-farthestCellRight(currRow,currCol){
-   while(currCol<GRIDSIZE-1 && this.board[currRow][currCol+1]==null){
-       currCol ++;
-   }
-   return currCol;
-}
-
-/**
- * Shifts all cells up if possible
- */
-moveUp(){
-    var moved = false;
-    for (let column = 0; column < GRIDSIZE; column++) {
+    /**
+     * Shifts all cells to the right if possible
+     */
+    moveRight(){
+        var moved = false;
         for (let row = 0; row < GRIDSIZE; row++) {
-            const cell = this.board[row][column];
-            if(cell!=null){
-            var desCell = this.farthestCellUp(row,column);
-            if(desCell==0){
-                var nextCell = null;
-            }else{
-            var nextCell = this.board[desCell-1][column];
-            }
-            if(cell == nextCell) {
-                this.mergeY(row,desCell-1,column);
-                moved = true;
-            } else if(desCell != row){
-                this.moveY(row,desCell,column,false);
-                moved = true;
-            }
-   }
-       }
-   }
-     if(moved)this.randomInitTile();   
-}
+            for (let column = GRIDSIZE-1; column >= 0; column--) {
+                const cell = this.board[row][column];
+                if(cell!==null){
+                var desCell = this.farthestCellRight(row,column);
+                var nextCell = this.board[row][desCell+1];
+                if(cell === nextCell) {
+                    this.mergeX(column,desCell+1,row);
+                    moved = true;
+                } else if(desCell !== column){
+                    this.moveX(column,desCell,row,false);
+                    moved = true;
+                }
+    }
+        }
+    }
+        if(moved)this.randomInitTile();   
+    }
 
-/**
-* Finds the upmost position that the current cell can shift to
-* @param {number} currRow 
-* @param {number} currCol 
-*/
-farthestCellUp(currRow,currCol){
-   while(currRow>0 && this.board[currRow-1][currCol]==null){
-       currRow --;
-   }
-   return currRow;
-}
+    /**
+    * Finds the rightmost position that the current cell can shift to
+    * @param {number} currRow 
+    * @param {number} currCol 
+    */
+    farthestCellRight(currRow,currCol){
+    while(currCol<GRIDSIZE-1 && this.board[currRow][currCol+1]===null){
+        currCol ++;
+    }
+    return currCol;
+    }
 
-/**
- * Shifts all cells down if possible
- */
-moveDown(){
-    var moved = false;
-    for (let column = 0; column < GRIDSIZE; column++) {
-        for (let row = GRIDSIZE-1; row >= 0; row--) {
-            const cell = this.board[row][column];
-            if(cell!=null){
-            var desCell = this.farthestCellDown(row,column);
-            if(desCell==3){
-                var nextCell = null;
-            }else{
-                var nextCell = this.board[desCell+1][column];
-            }
-            if(cell == nextCell) {
-                this.mergeY(row,desCell+1,column);
-                moved = true;
-            } else if(desCell != row){
-                this.moveY(row,desCell,column,false);
-                moved = true;
-            }
-   }
-       }
-   }
-     if(moved)this.randomInitTile();   
-}
+    /**
+     * Shifts all cells up if possible
+     */
+    moveUp(){
+        var moved = false;
+        for (let column = 0; column < GRIDSIZE; column++) {
+            for (let row = 0; row < GRIDSIZE; row++) {
+                const cell = this.board[row][column];
+                if(cell!==null){
+                var desCell = this.farthestCellUp(row,column);
+                if(desCell===0){
+                    var nextCell = null;
+                }else{
+                var nextCell = this.board[desCell-1][column];
+                }
+                if(cell === nextCell) {
+                    this.mergeY(row,desCell-1,column);
+                    moved = true;
+                } else if(desCell !== row){
+                    this.moveY(row,desCell,column,false);
+                    moved = true;
+                }
+    }
+        }
+    }
+        if(moved)this.randomInitTile();   
+    }
 
-/**
-* Finds the downmost position that the current cell can shift to
-* @param {number} currRow 
-* @param {number} currCol 
-*/
-farthestCellDown(currRow,currCol){
-   while(currRow<GRIDSIZE-1 && this.board[currRow+1][currCol]==null){
-       currRow ++;
-   }
-   return currRow;
-}
+    /**
+    * Finds the upmost position that the current cell can shift to
+    * @param {number} currRow 
+    * @param {number} currCol 
+    */
+    farthestCellUp(currRow,currCol){
+    while(currRow>0 && this.board[currRow-1][currCol]===null){
+        currRow --;
+    }
+    return currRow;
+    }
+
+    /**
+     * Shifts all cells down if possible
+     */
+    moveDown(){
+        var moved = false;
+        for (let column = 0; column < GRIDSIZE; column++) {
+            for (let row = GRIDSIZE-1; row >= 0; row--) {
+                const cell = this.board[row][column];
+                if(cell!==null){
+                var desCell = this.farthestCellDown(row,column);
+                if(desCell===3){
+                    var nextCell = null;
+                }else{
+                    var nextCell = this.board[desCell+1][column];
+                }
+                if(cell === nextCell) {
+                    this.mergeY(row,desCell+1,column);
+                    moved = true;
+                } else if(desCell !== row){
+                    this.moveY(row,desCell,column,false);
+                    moved = true;
+                }
+    }
+        }
+    }
+        if(moved)this.randomInitTile();   
+    }
+
+    /**
+    * Finds the downmost position that the current cell can shift to
+    * @param {number} currRow 
+    * @param {number} currCol 
+    */
+    farthestCellDown(currRow,currCol){
+    while(currRow<GRIDSIZE-1 && this.board[currRow+1][currCol]===null){
+        currRow ++;
+    }
+    return currRow;
+    }
 
     /**
      * Insert a block to the board 
@@ -356,7 +358,7 @@ farthestCellDown(currRow,currCol){
                     break;
             }
             console.log(backgroundColor);
-            $('.grid-component').css({'background-color': backgroundColor}); //incomplete!!!!!
+            $(`.${x}-${y}`).css({'background': backgroundColor});
     }
 
     // Helpers
