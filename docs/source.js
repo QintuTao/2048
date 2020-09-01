@@ -154,27 +154,31 @@ class Board {
     moveLeft(){
         var moved = false;
         for (let row = 0; row < GRIDSIZE; row++) {
-            let countTile = 0;
             let hasMerged = false
             for (let column = 0; column < GRIDSIZE; column++) {
                 const cell = this.board[row][column];
                 if(cell!==null){
-                    var desCell = this.farthestCellLeft(row,column, countTile);
-                    var nextCell = this.board[row][desCell-1];
-                    countTile++
-                    if(cell === nextCell && !hasMerged) {
-                        this.mergeX(column,desCell-1,row);
-                        moved = true;
-                        countTile--
-                        hasMerged = true
-                    } else if(desCell !== column){
-                        this.moveX(column,desCell,row,false);
-                        moved = true;
-                        hasMerged = false
+                    var desCell = this.farthestCellLeft(row,column-1);
+                    console.log(desCell)
+                    if (desCell < 0) {
+                        if (column !== 0) {
+                            this.moveX(column, 0, row)
+                            moved = true
+                        }
+                    } else {
+                        var nextCell = this.board[row][desCell];
+                        if(cell === nextCell && !hasMerged) {
+                            this.mergeX(column,desCell,row);
+                            moved = true;
+                            hasMerged = true
+                        } else if(desCell+1 !== column){
+                            this.moveX(column,desCell+1,row,false);
+                            moved = true;
+                            hasMerged = false
+                        }
                     }
                 }
             }
-            console.log(this.board)
         }
         if(moved)this.randomInitTile();   
     }
@@ -184,8 +188,8 @@ class Board {
  * @param {number} currRow 
  * @param {number} currCol 
  */
-farthestCellLeft(currRow,currCol,cnt){
-    while(currCol>cnt&&this.board[currRow][currCol-1]===null){
+farthestCellLeft(currRow,currCol){
+    while(currCol>=0 && this.board[currRow][currCol]===null){
         currCol --;
     }
     return currCol;
@@ -197,29 +201,34 @@ farthestCellLeft(currRow,currCol,cnt){
     moveRight(){
         var moved = false;
         for (let row = 0; row < GRIDSIZE; row++) {
-            let countTile = 0
             let hasMerged = false
             for (let column = GRIDSIZE-1; column >= 0; column--) {
                 const cell = this.board[row][column];
                 if(cell!==null) {
-                var desCell = this.farthestCellRight(row,column, countTile);
-                var nextCell = this.board[row][desCell+1];
-                countTile++
-                if(cell === nextCell && !hasMerged) {
-                    this.mergeX(column,desCell+1,row);
-                    moved = true;
-                    countTile--
-                    hasMerged = true
-                } else if(desCell !== column){
-                    this.moveX(column,desCell,row,false);
-                    moved = true;
-                    hasMerged = false 
+                var desCell = this.farthestCellRight(row,column+1);
+                if (desCell == GRIDSIZE) {
+                    if (column !== GRIDSIZE-1) {
+                        this.moveX(column, GRIDSIZE-1, row)
+                        moved = true
+                        hasMerged = false
+                    }
+                } else {
+                    var nextCell = this.board[row][desCell];
+                    if(cell === nextCell && !hasMerged) {
+                        this.mergeX(column,desCell,row);
+                        moved = true;
+                        hasMerged = true
+                    } else if(desCell-1 !== column){
+                        this.moveX(column,desCell-1,row,false);
+                        moved = true;
+                        hasMerged = false 
+                        }
+                    } 
                 }
-    }
+            }
         }
-    }
-        if(moved)this.randomInitTile();   
         console.log(this.board)
+        if(moved)this.randomInitTile();   
     }
 
     /**
@@ -227,8 +236,8 @@ farthestCellLeft(currRow,currCol,cnt){
     * @param {number} currRow 
     * @param {number} currCol 
     */
-    farthestCellRight(currRow,currCol, cnt){
-    while(currCol<GRIDSIZE-1-cnt && this.board[currRow][currCol+1]===null){
+    farthestCellRight(currRow,currCol){
+    while(currCol<=GRIDSIZE-1 && this.board[currRow][currCol]===null){
         currCol ++;
     }
     return currCol;
