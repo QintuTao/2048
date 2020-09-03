@@ -23,6 +23,7 @@ class Board {
             return arr;
         })
 
+        this.score = 0
         this.syncLock = false // true == ON, which means the class is locked and no key press should invoke any effects 
 
         /** Binding Methods */
@@ -39,9 +40,14 @@ class Board {
         this.farthestCellDown = this.farthestCellDown.bind(this);
         this.double = this.double.bind(this);
         this.changeColor = this.changeColor.bind(this);
+        this.changeFontSize = this.changeFontSize.bind(this);
+        this.renderScore = this.renderScore.bind(this);
     }
 
-    start() {this.randomInitTile()}
+    start() {
+        this.randomInitTile();
+        this.renderScore();
+    }
 
     /**
      * Creates a tile with value '2' at random position
@@ -56,6 +62,13 @@ class Board {
         }
         this.board[randY][randX] = 2;
         this.append(randX, randY);
+    }
+
+    /**
+     * Renders the current score
+     */
+    renderScore() {
+        $(".score").empty().append(this.score);
     }
 
     /**
@@ -117,6 +130,8 @@ class Board {
             this.board[y][des] = 2 * temp
             const val = this.double(des,y)
             this.changeColor(2 * temp, des, y)
+            this.changeFontSize(2 * temp, des, y)
+            this.score += 2 * temp
             $(`.${des}-${y}`).text(this.board[y][des])
         }
     }
@@ -134,6 +149,8 @@ class Board {
             this.board[des][x] = 2 * temp
             const val = this.double(des,x)
             this.changeColor(2 * temp, x, des)
+            this.changeFontSize(2 * temp, x, des)
+            this.score += 2 * temp
             $(`.${x}-${des}`).text(this.board[des][x])
 
         }
@@ -173,7 +190,6 @@ class Board {
         if(moved)this.randomInitTile();  
         for (let index = 0; index < this.board.length; index++) {
             const element = this.board[index];
-            console.log(element)
         } 
     }
 
@@ -222,11 +238,9 @@ farthestCellLeft(currRow,currCol){
                 }
             }
         }
-        console.log(this.board)
         if(moved)this.randomInitTile();   
         for (let index = 0; index < this.board.length; index++) {
             const element = this.board[index];
-            console.log(element)
         } 
     }
 
@@ -278,7 +292,6 @@ farthestCellLeft(currRow,currCol){
         if(moved)this.randomInitTile();   
         for (let index = 0; index < this.board.length; index++) {
             const element = this.board[index];
-            console.log(element)
         } 
     }
 
@@ -401,6 +414,31 @@ farthestCellLeft(currRow,currCol){
             
     }
 
+    changeFontSize(value, x, y){
+        var fontSize = 70;
+        switch (value) {
+            case 128:
+                fontSize =  60;
+                break;
+            case 256:
+                fontSize =  60;
+                break;
+            case 512:
+                fontSize =  60;   
+                break;
+            case 1024:
+                fontSize =  40; 
+                break;
+            case 2048:
+                fontSize =  40;    
+                break;
+            default:
+                fontSize = 70;
+                break;
+            }
+            $(`.${x}-${y}`).css("font-size", fontSize + "px");
+    }
+
     // Helpers
     getRandomInt() {
         return Math.floor(Math.random() * GRIDSIZE)
@@ -455,15 +493,19 @@ const bindKeys = (board) => {
         if (evt.keyCode === 37) {
             console.log("left key pressed");
             board.moveLeft();
+            board.renderScore();
          } else if (evt.keyCode === 39) {
             console.log("right key pressed");
             board.moveRight();
+            board.renderScore();
          } else if (evt.keyCode === 38){
             console.log("up key pressed");
             board.moveUp();
+            board.renderScore();
          } else if (evt.keyCode === 40){
             console.log("down key pressed");
             board.moveDown();
+            board.renderScore();
          }
     });
 }
