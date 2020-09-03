@@ -78,12 +78,14 @@ class Board {
             this.board[y][init] = null
             if (endLife) {
                 $(`.${init}-${y}`).css("transform", this.getTileCSSTransform(des, y))
-                setTimeout(function() {
-                    $(`.tile`).remove(`.${init}-${y}`)
-                }, 200)
+                $(`div`).remove(`.${init}-${y}`)
+                // window.setTimeout(function() {
+                    
+                //     console.log(`removed div at ${init}-${y}`)
+                // }, 10)
                 
             } else {
-                $(`.${init}-${y}`).removeClass(`${init}-${y}`).addClass(`${des}-${y}`)
+                $(`.${init}-${y}`).addClass(`${des}-${y}`).removeClass(`${init}-${y}`)
                 $(`.${des}-${y}`).css("transform", this.getTileCSSTransform(des, y))
             }
     }
@@ -99,12 +101,9 @@ class Board {
             this.board[des][x] = this.board[init][x]
             this.board[init][x] = null
             if (endLife) {
-                $(`.${x}-${init}`).css("transform", this.getTileCSSTransform(x, des))
-                setTimeout(function() {
-                    $(`.tile`).remove(`.${x}-${init}`)
-                }, 200)
+                $(`div`).remove(`.${x}-${init}`)
             } else {
-                $(`.${x}-${init}`).removeClass(`${x}-${init}`).addClass(`${x}-${des}`)
+                $(`.${x}-${init}`).addClass(`${x}-${des}`).removeClass(`${x}-${init}`)
                 $(`.${x}-${des}`).css("transform", this.getTileCSSTransform(x, des))
             }
     }
@@ -120,9 +119,6 @@ class Board {
             const temp = this.board[y][des]
             console.log(temp)
             this.moveX(init,des,y, true)
-            setTimeout(function() {
-                this.board[y][init] = null;
-            }.bind(this), 200)
             this.board[y][des] = 2 * temp
             this.double(des,y)
             $(`.${des}-${y}`).text(this.board[y][des])
@@ -139,9 +135,6 @@ class Board {
         if (this.isOccupied(x,des) && this.board[des][x] === this.board[init][x]) {
             const temp = this.board[des][x]
             this.moveY(init,des,x, true)
-            setTimeout(function() {
-                this.board[init][x] = null
-            }.bind(this), 200)
             this.board[des][x] = 2 * temp
             this.double(des,x)
             $(`.${x}-${des}`).text(this.board[des][x])
@@ -158,8 +151,7 @@ class Board {
             for (let column = 0; column < GRIDSIZE; column++) {
                 const cell = this.board[row][column];
                 if(cell!==null){
-                    var desCell = this.farthestCellLeft(row,column-1);
-                    console.log(desCell)
+                    var desCell = this.farthestCellLeft(row,column-1)
                     if (desCell < 0) {
                         if (column !== 0) {
                             this.moveX(column, 0, row)
@@ -180,7 +172,11 @@ class Board {
                 }
             }
         }
-        if(moved)this.randomInitTile();   
+        if(moved)this.randomInitTile();  
+        for (let index = 0; index < this.board.length; index++) {
+            const element = this.board[index];
+            console.log(element)
+        } 
     }
 
 /**
@@ -203,6 +199,7 @@ farthestCellLeft(currRow,currCol){
         for (let row = 0; row < GRIDSIZE; row++) {
             let hasMerged = false
             for (let column = GRIDSIZE-1; column >= 0; column--) {
+                
                 const cell = this.board[row][column];
                 if(cell!==null) {
                 var desCell = this.farthestCellRight(row,column+1);
@@ -229,6 +226,10 @@ farthestCellLeft(currRow,currCol){
         }
         console.log(this.board)
         if(moved)this.randomInitTile();   
+        for (let index = 0; index < this.board.length; index++) {
+            const element = this.board[index];
+            console.log(element)
+        } 
     }
 
     /**
@@ -249,26 +250,38 @@ farthestCellLeft(currRow,currCol){
     moveUp(){
         var moved = false;
         for (let column = 0; column < GRIDSIZE; column++) {
+            let hasMerged = false
             for (let row = 0; row < GRIDSIZE; row++) {
                 const cell = this.board[row][column];
                 if(cell!==null){
-                var desCell = this.farthestCellUp(row,column);
-                if(desCell===0){
-                    var nextCell = null;
-                }else{
-                var nextCell = this.board[desCell-1][column];
+                    var desCell = this.farthestCellUp(row-1,column);
+                    if(desCell < 0){
+                        if (row !== 0) {
+                            this.moveY(row, 0, column, false)
+                            moved = true
+                            hasMerged = false
+                        }
+                    } else {
+                        var nextCell = this.board[desCell][column];
+                        if(cell === nextCell && !hasMerged) {
+                            this.mergeY(row,desCell,column);
+                            moved = true;
+                            hasMerged = true
+                        } else if(desCell+1 !== row){
+                            this.moveY(row,desCell+1,column,false);
+                            moved = true;
+                            hasMerged = false
+                        }
+                    }
+                    
                 }
-                if(cell === nextCell) {
-                    this.mergeY(row,desCell-1,column);
-                    moved = true;
-                } else if(desCell !== row){
-                    this.moveY(row,desCell,column,false);
-                    moved = true;
-                }
-    }
+            }
         }
-    }
         if(moved)this.randomInitTile();   
+        for (let index = 0; index < this.board.length; index++) {
+            const element = this.board[index];
+            console.log(element)
+        } 
     }
 
     /**
@@ -277,7 +290,7 @@ farthestCellLeft(currRow,currCol){
     * @param {number} currCol 
     */
     farthestCellUp(currRow,currCol){
-    while(currRow>0 && this.board[currRow-1][currCol]===null){
+    while(currRow>=0 && this.board[currRow][currCol]===null){
         currRow --;
     }
     return currRow;
@@ -289,22 +302,30 @@ farthestCellLeft(currRow,currCol){
     moveDown(){
         var moved = false;
         for (let column = 0; column < GRIDSIZE; column++) {
+            let hasMerged = false
             for (let row = GRIDSIZE-1; row >= 0; row--) {
                 const cell = this.board[row][column];
                 if(cell!==null){
-                var desCell = this.farthestCellDown(row,column);
-                if(desCell===3){
-                    var nextCell = null;
-                }else{
-                    var nextCell = this.board[desCell+1][column];
-                }
-                if(cell === nextCell) {
-                    this.mergeY(row,desCell+1,column);
-                    moved = true;
-                } else if(desCell !== row){
-                    this.moveY(row,desCell,column,false);
-                    moved = true;
-                }
+                    var desCell = this.farthestCellDown(row+1,column);
+                    if(desCell >= GRIDSIZE){
+                        if (row != GRIDSIZE-1) {
+                            this.moveY(row, GRIDSIZE-1, column, false)
+                            moved = true
+                            hasMerged = false
+                        }
+                    } else {
+                        var nextCell = this.board[desCell][column];
+                        if (cell === nextCell) {
+                            this.mergeY(row,desCell,column);
+                            moved = true;
+                            hasMerged = true
+                        } else if(desCell-1 !== row){
+                            this.moveY(row,desCell-1,column,false);
+                            moved = true;
+                            hasMerged = false
+                        }
+                    }
+                    
     }
         }
     }
@@ -317,7 +338,7 @@ farthestCellLeft(currRow,currCol){
     * @param {number} currCol 
     */
     farthestCellDown(currRow,currCol){
-    while(currRow<GRIDSIZE-1 && this.board[currRow+1][currCol]===null){
+    while(currRow<=GRIDSIZE-1 && this.board[currRow][currCol]===null){
         currRow ++;
     }
     return currRow;
@@ -336,13 +357,12 @@ farthestCellLeft(currRow,currCol){
     }
 
     double(x,y) {
-        $(`.${x}-${y}`).val($(`.${x}-${y}`).val() * 2);
-        this.changeColor(x,y);
+        const value = $(`.${x}-${y}`).val()
+        $(`.${x}-${y}`).val(value * 2);
+        $(`.${x}-${y}`).css({'background': this.changeColor(value*2)});
     }    
 
-    changeColor(x,y){
-        var value = this.board[x][y];
-        console.log(value);
+    changeColor(value){
         var backgroundColor = "#eee4da";
             switch (value) {
                 case 4:
@@ -379,8 +399,8 @@ farthestCellLeft(currRow,currCol){
                     backgroundColor = "#eee4da";
                     break;
             }
-            console.log(backgroundColor);
-            $(`.${x}-${y}`).css({'background': backgroundColor});
+            return backgroundColor
+            
     }
 
     // Helpers
@@ -394,6 +414,11 @@ farthestCellLeft(currRow,currCol){
 
     getTileCSSTransform(x, y) {
         return `translate(${x * 100 + (x+1)*10}px, ${y * 100 + (y+1)*10}px)`
+    }
+
+    delay() {
+        let due = new Date().getTime() + 100
+        while (new Date().getTime() < due) {}
     }
 }
 
